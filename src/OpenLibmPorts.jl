@@ -20,7 +20,7 @@ function loggamma(x::Float64)
     hx < 0 && (ix < 0x3b900000 || ix ≥ 0x43300000) && throw(DomainError(x, "`gamma(x)` must be non-negative"))
     lgamma(x)
 end
-function loggamma(x::Float64)
+function loggamma(x::Float32)
     hx = reinterpret(Int32, x)
     ix = signed(hx & 0x7fffffff)
     hx < 0 && (ix < 0x35000000 || ix ≥ 0x4b000000) && throw(DomainError(x, "`gamma(x)` must be non-negative"))
