@@ -12,6 +12,7 @@ lgamma(x::Float64) = lgamma_r(x)
 lgamma(x::Float32) = lgammaf_r(x)
 lgamma(x::Float16) = Float16(lgammaf_r(Float32(x)))
 
+# TODO fix this interface, or handle within lgamma itself.
 loggamma(x::Number) = loggamma(float(x))
 function loggamma(x::Float64)
     u = reinterpret(UInt64, x)
