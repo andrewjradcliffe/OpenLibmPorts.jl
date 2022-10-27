@@ -14,13 +14,6 @@
 =#
 
 #=
-The original license for is given at the top of the file.
-Acknowledgments: this is a direct port of the corresponding code from
-openlibm (https://github.com/JuliaMath/openlibm). I have copied the
-comments and structure so as to faithfully maintain the correspondence.
-=#
-
-#=
 
 /* __ieee754_lgamma_r(x, signgamp)
  * Reentrant version of the logarithm of the Gamma function
