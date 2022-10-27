@@ -1,7 +1,5 @@
 module OpenLibmPorts
 
-# Write your package code here.
-
 include("e_lgamma_r.jl")
 include("e_lgammaf_r.jl")
 
@@ -26,5 +24,29 @@ end
 
 logabsgamma(x::Number) = logabsgamma(float(x))
 logabsgamma(x::Base.IEEEFloat) = _logabsgamma(x)
+
+####
+#=
+Equivalent functions from SpecialFunctions, defined using the above drop-in
+replacements. Why bother? Pure Julia, hence, differentiable without
+ChainRules, ChainRulesCore, etc.
+
+Why bother, you might ask? In the construction of Bayesian models,
+certain special functions may show up in the likelihood (!!!
+e.g. loggamma in negative binomial), which means that considerable
+latency can be introduced by marginally slower special functions. One
+might be inclined to be incredulous at such a statement, but consider
+that a log-likelihood computation is essentially a sum involving M
+terms, i.e. ∑ᵢ₌₁ᴹ f(xᵢ). This cost is linear in the number terms,
+thus, we have M evals of f. If we assume the cost of summation itself
+to be negligible (it's not), then the cost of the log-likelihood is
+equal to M times the cost of f. In this light, any reduction to the
+cost of f translates directly to an equivalent reduction in the
+log-likelihood computation. As the log-likelihood is most often the
+dominant cost in a probabilistic model (which does not involve ODEs),
+reductions thereof translate directly to reductions in overall time
+required to fit the model.
+
+=#
 
 end
