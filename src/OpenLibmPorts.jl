@@ -5,28 +5,26 @@ module OpenLibmPorts
 include("e_lgamma_r.jl")
 include("e_lgammaf_r.jl")
 
-export lgamma
-
-lgamma(x::Number) = lgamma(float(x))
-lgamma(x::Float64) = lgamma_r(x)
-lgamma(x::Float32) = lgammaf_r(x)
-lgamma(x::Float16) = Float16(lgammaf_r(Float32(x)))
-
-# TODO fix this interface, or handle within lgamma itself.
+# Matches behavior of SpecialFunctions' loggamma, but is ≈ 25% faster since the
+# negative sign is not returned, but rather, a DomainError is thrown.
 loggamma(x::Number) = loggamma(float(x))
-function loggamma(x::Float64)
-    u = reinterpret(UInt64, x)
-    hx = signed((u >>> 32) % UInt32)
-    ix = signed(hx & 0x7fffffff)
-    hx < 0 && (ix < 0x3b900000 || ix ≥ 0x43300000) && throw(DomainError(x, "`gamma(x)` must be non-negative"))
-    lgamma(x)
+loggamma(x::Float64) = loggamma_r(x)
+loggamma(x::Float32) = loggammaf_r(x)
+loggamma(x::Float16) = Float16(loggammaf_r(Float32(x)))
+
+
+# Matches behavior of SpecialFunctions' logabsgamma
+_logabsgamma(x::Float64) = lgamma_r(x)
+function _logabsgamma(x::Float32)
+    y, s = lgammaf_r(x)
+    y, Int(s)
 end
-function loggamma(x::Float32)
-    hx = reinterpret(Int32, x)
-    ix = signed(hx & 0x7fffffff)
-    hx < 0 && (ix < 0x35000000 || ix ≥ 0x4b000000) && throw(DomainError(x, "`gamma(x)` must be non-negative"))
-    lgamma(x)
+function _logabsgamma(x::Float16)
+    y, s = lgammaf_r(Float32(x))
+    Float16(y), s
 end
-loggamma(x::Float16) = Float16(loggamma(Float32(x)))
+
+logabsgamma(x::Number) = logabsgamma(float(x))
+logabsgamma(x::Base.IEEEFloat) = _logabsgamma(x)
 
 end

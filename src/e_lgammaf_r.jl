@@ -78,7 +78,128 @@ const w4f  = -5.9518753551f-04 #= 0xba1c065c =#
 const w5f  =  8.3633989561f-04 #= 0x3a5b3dd2 =#
 const w6f  = -1.6309292987f-03 #= 0xbad5c4e8 =#
 
+# Matches OpenLibm behavior exactly, including return of sign
 function lgammaf_r(x::Float32)
+    hx = reinterpret(Int32, x)
+
+    #= purge off +-inf, NaN, +-0, tiny and negative arguments =#
+    signgamp = Int32(1)
+    ix = signed(hx & 0x7fffffff)
+    ix ≥ 0x7f800000 && return x * x, signgamp
+    ix == 0 && return 1.0f0 / 0.0f0, signgamp
+    if ix < 0x35000000 #= |x|<2**-21, return -log(|x|) =#
+        if hx < 0
+            signgamp = Int32(-1)
+            return -log(-x), signgamp
+        else
+            return -log(x), signgamp
+        end
+    end
+    if hx < 0
+        ix ≥ 0x4b000000 && return 1.0f0 / 0.0f0, signgamp #= |x|>=2**23, must be -integer =#
+        t = sinpi(x)
+        t == 0.0f0 && return 1.0f0 / 0.0f0, signgamp #= -integer =#
+        nadj = log(π / abs(t * x))
+        if t < 0.0f0; signgamp = Int32(-1); end
+        x = -x
+    end
+
+    #= purge off 1 and 2 =#
+    if ix == 0x3f800000 || ix == 0x40000000
+        r = 0.0f0
+        #= for x < 2.0 =#
+    elseif ix < 0x40000000
+        if ix ≤ 0x3f666666 #= lgamma(x) = lgamma(x+1)-log(x) =#
+            r = -log(x)
+            if ix ≥ 0x3f3b4a20
+                y = 1.0f0 - x
+                i = 0
+            elseif ix ≥ 0x3e6d3308
+                y = x - (tcf - 1.0f0)
+                i = 1
+            else
+                y = x
+                i = 2
+            end
+        else
+            r = 0.0f0
+            if ix ≥ 0x3fdda618 #= [1.7316,2] =#
+                y = 2.0f0 - x
+                i = 0
+            elseif ix ≥ 0x3f9da620 #= [1.23,1.73] =#
+                y = x - tcf
+                i = 1
+            else
+                y = x - 1.0f0
+                i = 2
+            end
+        end
+        if i == 0
+            z = y*y;
+		    p1 = a0f+z*(a2f+z*(a4f+z*(a6f+z*(a8f+z*a10f))));
+		    p2 = z*(a1f+z*(a3f+z*(a5f+z*(a7f+z*(a9f+z*a11f)))));
+		    p  = y*p1+p2;
+		    r  += (p-0.5f0*y);
+        elseif i == 1
+            z = y*y;
+		    w = z*y;
+		    p1 = t0f+w*(t3f+w*(t6f+w*(t9f +w*t12f)));	#= parallel comp =#
+		    p2 = t1f+w*(t4f+w*(t7f+w*(t10f+w*t13f)));
+		    p3 = t2f+w*(t5f+w*(t8f+w*(t11f+w*t14f)));
+		    p  = z*p1-(ttf-w*(p2+y*p3));
+		    r += (tff + p)
+        elseif i == 2
+            p1 = y*(u0f+y*(u1f+y*(u2f+y*(u3f+y*(u4f+y*u5f)))));
+		    p2 = 1.0f0+y*(v1f+y*(v2f+y*(v3f+y*(v4f+y*v5f))));
+		    r += (-0.5f0*y + p1/p2);
+        end
+    elseif ix < 0x41000000 #= x < 8.0 =#
+        i = trunc(Int, x)
+        y = x - Float32(i)
+        p = y*(s0f+y*(s1f+y*(s2f+y*(s3f+y*(s4f+y*(s5f+y*s6f))))));
+	    q = 1.0f0 + y*(r1f+y*(r2f+y*(r3f+y*(r4f+y*(r5f+y*r6f)))));
+	    r = 0.5f0*y+p/q;
+	    z = 1.0f0;	#= lgamma(1+s) = log(s) + lgamma(s) =#
+        if i == 7
+            z *= (y + 6.0f0)
+            @goto case6
+        elseif i == 6
+            @label case6
+            z *= (y + 5.0f0)
+            @goto case5
+        elseif i == 5
+            @label case5
+            z *= (y + 4.0f0)
+            @goto case4
+        elseif i == 4
+            @label case4
+            z *= (y + 3.0f0)
+            @goto case3
+        elseif i == 3
+            @label case3
+            z *= (y + 2.0f0)
+        end
+        r += log(z)
+        #= 8.0 ≤ x < 2^58 =#
+    elseif ix < 0x5c800000
+        t = log(x)
+        z = 1.0f0 / x
+        y = z * z
+        w = w0f+z*(w1f+y*(w2f+y*(w3f+y*(w4f+y*(w5f+y*w6f)))));
+	    r = (x-0.5f0)*(t-1.0f0)+w;
+    else
+        #= 2^58 ≤ x ≤ Inf =#
+        r = x * (log(x) - 1.0f0)
+    end
+    if hx < 0
+        r = nadj - r
+    end
+    return r, signgamp
+end
+
+# Deviates from OpenLibm: throws instead of returning negative sign; approximately 25% faster
+# when sign is not needed in subsequent computations.
+function loggammaf_r(x::Float32)
     hx = reinterpret(Int32, x)
 
     #= purge off +-inf, NaN, +-0, tiny and negative arguments =#
@@ -87,7 +208,8 @@ function lgammaf_r(x::Float32)
     ix == 0 && return 1.0f0 / 0.0f0
     if ix < 0x35000000 #= |x|<2**-21, return -log(|x|) =#
         if hx < 0
-            return -log(-x)
+            # return -log(-x)
+            throw(DomainError(x, "`gamma(x)` must be non-negative"))
         else
             return -log(x)
         end
@@ -97,6 +219,7 @@ function lgammaf_r(x::Float32)
         t = sinpi(x)
         t == 0.0f0 && return 1.0f0 / 0.0f0 #= -integer =#
         nadj = log(π / abs(t * x))
+        t < 0.0f0 && throw(DomainError(x, "`gamma(x)` must be non-negative"))
         x = -x
     end
 
