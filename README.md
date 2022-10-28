@@ -47,6 +47,6 @@ julia> OpenLibmPorts.logabsgamma(2.009904444771008)
 ```
 
 ## Benchmark of logabsgamma, loggamma
-![benchplot_64](https://raw.githubusercontent.com/andrewjradcliffe/OpenLibmPorts.jl/main/docs/src/assets/benchplot_64.svg)
+![benchplot_64](https://github.com/andrewjradcliffe/OpenLibmPorts.jl/main/docs/src/assets/benchplot_64.svg)
 
-![benchplot_32](https://raw.githubusercontent.com/andrewjradcliffe/OpenLibmPorts.jl/main/docs/src/assets/benchplot_32.svg)
+![benchplot_32](https://github.com/andrewjradcliffe/OpenLibmPorts.jl/main/docs/src/assets/benchplot_32.svg)
