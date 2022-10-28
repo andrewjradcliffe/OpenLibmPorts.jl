@@ -8,18 +8,65 @@ involving 1 or more licenses, the relevant license(s) for each source
 file shall be reproduced at the top of said file; this confers the
 greatest clarity with respect to copyright.
 
-Acknowledgement and disclaimer: in general, this package will contain
-direct port of the corresponding code from openlibm
+At the time of writing (2022-10-27), this repository contains code
+adapted from OpenLibm which is itself adapted from FDLIBM. If/when
+code involving a new license is added, this list will be updated.
+
+
+## FDLIBM
+
+>       Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
+>       
+>       Developed at SunPro, a Sun Microsystems, Inc. business.
+>       Permission to use, copy, modify, and distribute this
+>       software is freely granted, provided that this notice
+>       is preserved.
+
+## Parts of OpenLibm copyrighted by Julia project (MIT License)
+
+>       Copyright (c) 2011-14 The Julia Project.
+>       https://github.com/JuliaMath/openlibm/graphs/contributors
+>       
+>       Permission is hereby granted, free of charge, to any person obtaining
+>       a copy of this software and associated documentation files (the
+>       "Software"), to deal in the Software without restriction, including
+>       without limitation the rights to use, copy, modify, merge, publish,
+>       distribute, sublicense, and/or sell copies of the Software, and to
+>       permit persons to whom the Software is furnished to do so, subject to
+>       the following conditions:
+>       
+>       The above copyright notice and this permission notice shall be
+>       included in all copies or substantial portions of the Software.
+>       
+>       THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+>       EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+>       MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+>       NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+>       LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+>       OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+>       WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+## Acknowledgement and disclaimer
+
+In general, this package will contain direct ports of the
+corresponding code from openlibm
 (https://github.com/JuliaMath/openlibm). I have copied the comments
 and structure so as to faithfully maintain the correspondence. I make
-no claim to any innovation or technical contribution; credit goes to
+no claims of innovation or technical contribution; credit goes to
 the OpenLibm project and the copyright holders cited therein.
+
+Any differences present between the source (OpenLibm) occur due
+language differences (C vs. Julia). Minor modifications which yield
+alternative versions (e.g. throw instead of return positive/negative
+sign) are not considered to be an innovation -- simply a convenience
+which may enhance performance, useful only to users that do not
+require the information implied by the positive/negative sign.
 
 If a source code file contains code which is not based on another
 implementation, i.e. new contributions not pertaining to code which
 already has an existing license, it shall be assumed to be MIT License.
 At the time of initial conception, the author intends this statement to
-refer to code of the following types: package interface and tests.
+refer to code of the following types: package interface, tests and benchmarking.
 For code which falls in this category, the relevant license:
 
 >       MIT License
