@@ -113,34 +113,34 @@ function lgammaf_r(x::Float32)
             r = -log(x)
             if ix ≥ 0x3f3b4a20
                 y = 1.0f0 - x
-                i = 0
+                i = Int8(0)
             elseif ix ≥ 0x3e6d3308
                 y = x - (tcf - 1.0f0)
-                i = 1
+                i = Int8(1)
             else
                 y = x
-                i = 2
+                i = Int8(2)
             end
         else
             r = 0.0f0
             if ix ≥ 0x3fdda618 #= [1.7316,2] =#
                 y = 2.0f0 - x
-                i = 0
+                i = Int8(0)
             elseif ix ≥ 0x3f9da620 #= [1.23,1.73] =#
                 y = x - tcf
-                i = 1
+                i = Int8(1)
             else
                 y = x - 1.0f0
-                i = 2
+                i = Int8(2)
             end
         end
-        if i == 0
+        if i == Int8(0)
             z = y*y;
 		    p1 = a0f+z*(a2f+z*(a4f+z*(a6f+z*(a8f+z*a10f))));
 		    p2 = z*(a1f+z*(a3f+z*(a5f+z*(a7f+z*(a9f+z*a11f)))));
 		    p  = y*p1+p2;
 		    r  += (p-0.5f0*y);
-        elseif i == 1
+        elseif i == Int8(1)
             z = y*y;
 		    w = z*y;
 		    p1 = t0f+w*(t3f+w*(t6f+w*(t9f +w*t12f)));	#= parallel comp =#
@@ -148,38 +148,42 @@ function lgammaf_r(x::Float32)
 		    p3 = t2f+w*(t5f+w*(t8f+w*(t11f+w*t14f)));
 		    p  = z*p1-(ttf-w*(p2+y*p3));
 		    r += (tff + p)
-        elseif i == 2
+        elseif i == Int8(2)
             p1 = y*(u0f+y*(u1f+y*(u2f+y*(u3f+y*(u4f+y*u5f)))));
 		    p2 = 1.0f0+y*(v1f+y*(v2f+y*(v3f+y*(v4f+y*v5f))));
 		    r += (-0.5f0*y + p1/p2);
         end
     elseif ix < 0x41000000 #= x < 8.0 =#
-        i = trunc(Int, x)
+        i = Base.unsafe_trunc(Int8, x)
         y = x - Float32(i)
-        p = y*(s0f+y*(s1f+y*(s2f+y*(s3f+y*(s4f+y*(s5f+y*s6f))))));
-	    q = 1.0f0 + y*(r1f+y*(r2f+y*(r3f+y*(r4f+y*(r5f+y*r6f)))));
-	    r = 0.5f0*y+p/q;
+        # If performed here, performance is 2x worse; hence, move it below.
+        # p = y*(s0f+y*(s1f+y*(s2f+y*(s3f+y*(s4f+y*(s5f+y*s6f))))));
+	    # q = 1.0f0 + y*(r1f+y*(r2f+y*(r3f+y*(r4f+y*(r5f+y*r6f)))));
+	    # r = 0.5f0*y+p/q;
 	    z = 1.0f0;	#= lgamma(1+s) = log(s) + lgamma(s) =#
-        if i == 7
+        if i == Int8(7)
             z *= (y + 6.0f0)
             @goto case6
-        elseif i == 6
+        elseif i == Int8(6)
             @label case6
             z *= (y + 5.0f0)
             @goto case5
-        elseif i == 5
+        elseif i == Int8(5)
             @label case5
             z *= (y + 4.0f0)
             @goto case4
-        elseif i == 4
+        elseif i == Int8(4)
             @label case4
             z *= (y + 3.0f0)
             @goto case3
-        elseif i == 3
+        elseif i == Int8(3)
             @label case3
             z *= (y + 2.0f0)
         end
-        r += log(z)
+        # r += log(z)
+        p = y*(s0f+y*(s1f+y*(s2f+y*(s3f+y*(s4f+y*(s5f+y*s6f))))));
+	    q = 1.0f0 + y*(r1f+y*(r2f+y*(r3f+y*(r4f+y*(r5f+y*r6f)))));
+	    r = log(z) + 0.5f0*y+p/q;
         #= 8.0 ≤ x < 2^58 =#
     elseif ix < 0x5c800000
         t = log(x)
@@ -232,34 +236,34 @@ function loggammaf_r(x::Float32)
             r = -log(x)
             if ix ≥ 0x3f3b4a20
                 y = 1.0f0 - x
-                i = 0
+                i = Int8(0)
             elseif ix ≥ 0x3e6d3308
                 y = x - (tcf - 1.0f0)
-                i = 1
+                i = Int8(1)
             else
                 y = x
-                i = 2
+                i = Int8(2)
             end
         else
             r = 0.0f0
             if ix ≥ 0x3fdda618 #= [1.7316,2] =#
                 y = 2.0f0 - x
-                i = 0
+                i = Int8(0)
             elseif ix ≥ 0x3f9da620 #= [1.23,1.73] =#
                 y = x - tcf
-                i = 1
+                i = Int8(1)
             else
                 y = x - 1.0f0
-                i = 2
+                i = Int8(2)
             end
         end
-        if i == 0
+        if i == Int8(0)
             z = y*y;
 		    p1 = a0f+z*(a2f+z*(a4f+z*(a6f+z*(a8f+z*a10f))));
 		    p2 = z*(a1f+z*(a3f+z*(a5f+z*(a7f+z*(a9f+z*a11f)))));
 		    p  = y*p1+p2;
 		    r  += (p-0.5f0*y);
-        elseif i == 1
+        elseif i == Int8(1)
             z = y*y;
 		    w = z*y;
 		    p1 = t0f+w*(t3f+w*(t6f+w*(t9f +w*t12f)));	#= parallel comp =#
@@ -267,17 +271,18 @@ function loggammaf_r(x::Float32)
 		    p3 = t2f+w*(t5f+w*(t8f+w*(t11f+w*t14f)));
 		    p  = z*p1-(ttf-w*(p2+y*p3));
 		    r += (tff + p)
-        elseif i == 2
+        elseif i == Int8(2)
             p1 = y*(u0f+y*(u1f+y*(u2f+y*(u3f+y*(u4f+y*u5f)))));
 		    p2 = 1.0f0+y*(v1f+y*(v2f+y*(v3f+y*(v4f+y*v5f))));
 		    r += (-0.5f0*y + p1/p2);
         end
     elseif ix < 0x41000000 #= x < 8.0 =#
-        i = trunc(Int, x)
+        i = Base.unsafe_trunc(Int8, x)
         y = x - Float32(i)
-        p = y*(s0f+y*(s1f+y*(s2f+y*(s3f+y*(s4f+y*(s5f+y*s6f))))));
-	    q = 1.0f0 + y*(r1f+y*(r2f+y*(r3f+y*(r4f+y*(r5f+y*r6f)))));
-	    r = 0.5f0*y+p/q;
+        # If performed here, performance is 2x worse; hence, move it below.
+        # p = y*(s0f+y*(s1f+y*(s2f+y*(s3f+y*(s4f+y*(s5f+y*s6f))))));
+	    # q = 1.0f0 + y*(r1f+y*(r2f+y*(r3f+y*(r4f+y*(r5f+y*r6f)))));
+	    # r = 0.5f0*y+p/q;
 	    z = 1.0f0;	#= lgamma(1+s) = log(s) + lgamma(s) =#
         if i == 7
             z *= (y + 6.0f0)
@@ -298,7 +303,10 @@ function loggammaf_r(x::Float32)
             @label case3
             z *= (y + 2.0f0)
         end
-        r += log(z)
+        # r += log(z)
+        p = y*(s0f+y*(s1f+y*(s2f+y*(s3f+y*(s4f+y*(s5f+y*s6f))))));
+	    q = 1.0f0 + y*(r1f+y*(r2f+y*(r3f+y*(r4f+y*(r5f+y*r6f)))));
+	    r = log(z) + 0.5f0*y+p/q;
         #= 8.0 ≤ x < 2^58 =#
     elseif ix < 0x5c800000
         t = log(x)
