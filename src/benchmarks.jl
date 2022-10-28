@@ -1,6 +1,8 @@
 # Some benchmark comparisons of loggamma
-
-using BenchmarkTools, SpecialFunctions, OpenLibmPorts
+# Most likely, one would like to save the plots somewhere other than PWD,
+# but, as a default, it should work.
+# Also, wrt the `include` -- I assume that the PWD is OpenLibmPorts/src
+# Again, hardly portable, but this is not really part of the package.
 
 using Distributed
 addprocs(24)
@@ -37,10 +39,3 @@ p2 = benchplots_min(Float32);
 savefig(p2, joinpath(pwd(), "benchplot_32.pdf"))
 savefig(p2, joinpath(pwd(), "benchplot_32.png"))
 savefig(p2, joinpath(pwd(), "benchplot_32.svg"))
-
-using Test
-for 𝑥 ∈ 0.0:1e-2:100.0
-    @test OpenLibmPorts.loggamma(𝑥) == OpenLibmPorts.loggamma_r4(𝑥)
-end
-
-b = bench(0.02)
