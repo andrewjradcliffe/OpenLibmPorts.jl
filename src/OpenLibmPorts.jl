@@ -37,7 +37,7 @@ e.g. loggamma in negative binomial), which means that considerable
 latency can be introduced by marginally slower special functions. One
 might be inclined to be incredulous at such a statement, but consider
 that a log-likelihood computation is essentially a sum involving M
-terms, i.e. ∑ᵢ₌₁ᴹ f(xᵢ). This cost is linear in the number terms,
+terms, i.e. ∑ᵢ₌₁ᴹ f(xᵢ). This cost is linear in the number of terms,
 thus, we have M evals of f. If we assume the cost of summation itself
 to be negligible (it's not), then the cost of the log-likelihood is
 equal to M times the cost of f. In this light, any reduction to the
@@ -48,5 +48,7 @@ reductions thereof translate directly to reductions in overall time
 required to fit the model.
 
 =#
+
+####
 
 end
