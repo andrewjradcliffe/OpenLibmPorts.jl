@@ -20,7 +20,7 @@ function _loggamma3(x::Float64)
 
     #= purge off +-inf, NaN, +-0, tiny and negative arguments =#
     signgamp = Int32(1)
-    ix = signed(hx & 0x7fffffff)
+    ix = hx & 0x7fffffff
     ix ≥ 0x7ff00000 && return typemax(x), signgamp  # isinf(x)
     ix | lx == 0x00000000 && return typemax(x), signgamp # iszero(x)
     if ix < 0x3b900000 #= |x|<2**-70, return -log(|x|) =#
