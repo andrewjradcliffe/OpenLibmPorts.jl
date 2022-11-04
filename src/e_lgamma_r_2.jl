@@ -16,7 +16,7 @@ tofloat(0x43900000) # 2.8823037615171174e17
 function _loggamma3(x::Float64)
     u = reinterpret(UInt64, x)
     hx = u >>> 32 % Int32
-    lx = u % Int32
+    lx = u % UInt32
 
     #= purge off +-inf, NaN, +-0, tiny and negative arguments =#
     signgamp = Int32(1)
