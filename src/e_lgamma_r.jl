@@ -150,9 +150,9 @@
 
 # Matches OpenLibm behavior exactly, including return of sign
 function lgamma_r(x::Float64)
-    u = reinterpret(UInt64, x)
-    hx = u >>> 32 % Int32
-    lx = u % UInt32
+    ux = reinterpret(UInt64, x)
+    hx = ux >>> 32 % Int32
+    lx = ux % UInt32
 
     #= purge off +-inf, NaN, +-0, tiny and negative arguments =#
     signgamp = Int32(1)
@@ -241,9 +241,9 @@ end
 # when sign is not needed in subsequent computations.
 
 function loggamma_r(x::Float64)
-    u = reinterpret(UInt64, x)
-    hx = u >>> 32 % Int32
-    lx = u % UInt32
+    ux = reinterpret(UInt64, x)
+    hx = ux >>> 32 % Int32
+    lx = ux % UInt32
 
     #= purge off +-inf, NaN, +-0, tiny and negative arguments =#
     ix = hx & 0x7fffffff
