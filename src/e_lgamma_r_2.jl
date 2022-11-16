@@ -21,8 +21,8 @@ function _loggamma3(x::Float64)
     #= purge off +-inf, NaN, +-0, tiny and negative arguments =#
     signgamp = Int32(1)
     ix = hx & 0x7fffffff
-    ix ≥ 0x7ff00000 && return Inf, signgamp
-    ix | lx == 0x00000000 && return Inf, signgamp
+    ix ≥ 0x7ff00000 && return x * x, signgamp # checks for Inf and NaN
+    ix | lx == 0x00000000 && return Inf, signgamp # checks for x == 0.0
     if ix < 0x3b900000 #= |x|<2**-70, return -log(|x|) =#
         if hx < Int32(0) # x < 0
             signgamp = Int32(-1)
