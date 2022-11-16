@@ -171,7 +171,7 @@ function lgamma_r(x::Float64)
         # ix ≥ 0x43300000 && return Inf, signgamp #= |x|>=2**52, must be -integer =#
         t = sinpi(x)
         iszero(t) && return Inf, signgamp #= -integer =#
-        nadj = log(π / abs(t * x))
+        nadj = logπ - log(abs(t * x))
         if t < 0.0; signgamp = Int32(-1); end
         x = -x
     end
@@ -247,7 +247,7 @@ function loggamma_r(x::Float64)
 
     #= purge off +-inf, NaN, +-0, tiny and negative arguments =#
     ix = hx & 0x7fffffff
-    ix ≥ 0x7ff00000 && return Inf
+    ix ≥ 0x7ff00000 && return x * x
     ix | lx == 0x00000000 && return Inf
     if ix < 0x3b900000 #= |x|<2**-70, return -log(|x|) =#
         hx < Int32(0) && throw(DomainError(x, "`gamma(x)` must be non-negative"))
@@ -257,7 +257,7 @@ function loggamma_r(x::Float64)
         # ix ≥ 0x43300000 && return Inf #= |x|>=2**52, must be -integer =#
         t = sinpi(x)
         iszero(t) && return Inf #= -integer =#
-        nadj = log(π / abs(t * x))
+        nadj = logπ - log(abs(t * x))
         t < 0.0 && throw(DomainError(x, "`gamma(x)` must be non-negative"))
         x = -x
     end

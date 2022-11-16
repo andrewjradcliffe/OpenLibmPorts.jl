@@ -1,5 +1,7 @@
 module OpenLibmPorts
 
+using IrrationalConstants
+
 include("e_lgamma_r.jl")
 include("e_lgammaf_r.jl")
 

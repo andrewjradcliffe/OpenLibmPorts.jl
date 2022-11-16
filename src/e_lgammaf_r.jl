@@ -99,7 +99,7 @@ function lgammaf_r(x::Float32)
         # ix ≥ 0x4b000000 && return Inf32, signgamp #= |x|>=2**23, must be -integer =#
         t = sinpi(x)
         t == 0.0f0 && return Inf32, signgamp #= -integer =#
-        nadj = log(π / abs(t * x))
+        nadj = logπ - log(abs(t * x))
         if t < 0.0f0; signgamp = Int32(-1); end
         x = -x
     end
@@ -174,7 +174,7 @@ function loggammaf_r(x::Float32)
 
     #= purge off +-inf, NaN, +-0, tiny and negative arguments =#
     ix = hx & 0x7fffffff
-    ix ≥ 0x7f800000 && return Inf32
+    ix ≥ 0x7f800000 && return x * x
     ix == 0x00000000 && return Inf32
     if ix < 0x35000000 #= |x|<2**-21, return -log(|x|) =#
         hx < Int32(0) && throw(DomainError(x, "`gamma(x)` must be non-negative"))
@@ -184,7 +184,7 @@ function loggammaf_r(x::Float32)
         # ix ≥ 0x4b000000 && return Inf32, signgamp #= |x|>=2**23, must be -integer =#
         t = sinpi(x)
         t == 0.0f0 && return Inf32 #= -integer =#
-        nadj = log(π / abs(t * x))
+        nadj = logπ - log(abs(t * x))
         t < 0.0f0 && throw(DomainError(x, "`gamma(x)` must be non-negative"))
         x = -x
     end
