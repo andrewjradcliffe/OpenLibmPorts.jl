@@ -14,14 +14,8 @@ loggamma(x::Float16) = Float16(loggammaf_r(Float32(x)))
 
 
 # Matches behavior of SpecialFunctions' logabsgamma
-function _logabsgamma(x::Float64)
-    y, s = lgamma_r(x)
-    y, Int(s)
-end
-function _logabsgamma(x::Float32)
-    y, s = lgammaf_r(x)
-    y, Int(s)
-end
+_logabsgamma(x::Float64) = lgamma_r(x)
+_logabsgamma(x::Float32) = lgammaf_r(x)
 function _logabsgamma(x::Float16)
     y, s = lgammaf_r(Float32(x))
     Float16(y), s

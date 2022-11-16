@@ -155,13 +155,13 @@ function lgamma_r(x::Float64)
     lx = ux % UInt32
 
     #= purge off +-inf, NaN, +-0, tiny and negative arguments =#
-    signgamp = Int32(1)
+    signgamp = 1
     ix = hx & 0x7fffffff
     ix ≥ 0x7ff00000 && return x * x, signgamp
     ix | lx == 0x00000000 && return Inf, signgamp
     if ix < 0x3b900000 #= |x|<2**-70, return -log(|x|) =#
         if hx < Int32(0)
-            signgamp = Int32(-1)
+            signgamp = -1
             return -log(-x), signgamp
         else
             return -log(x), signgamp
@@ -172,7 +172,7 @@ function lgamma_r(x::Float64)
         t = sinpi(x)
         iszero(t) && return Inf, signgamp #= -integer =#
         nadj = logπ - log(abs(t * x))
-        if t < 0.0; signgamp = Int32(-1); end
+        if t < 0.0; signgamp = -1; end
         x = -x
     end
     if ix ≤ 0x40000000     #= for 1.0 ≤ x ≤ 2.0 =#

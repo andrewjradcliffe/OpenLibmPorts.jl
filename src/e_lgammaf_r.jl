@@ -83,13 +83,13 @@ function lgammaf_r(x::Float32)
     hx = reinterpret(Int32, x)
 
     #= purge off +-inf, NaN, +-0, tiny and negative arguments =#
-    signgamp = Int32(1)
+    signgamp = 1
     ix = hx & 0x7fffffff
     ix ≥ 0x7f800000 && return x * x, signgamp
     ix == 0x00000000 && return Inf32, signgamp
     if ix < 0x35000000 #= |x|<2**-21, return -log(|x|) =#
         if hx < Int32(0)
-            signgamp = Int32(-1)
+            signgamp = -1
             return -log(-x), signgamp
         else
             return -log(x), signgamp
@@ -100,7 +100,7 @@ function lgammaf_r(x::Float32)
         t = sinpi(x)
         t == 0.0f0 && return Inf32, signgamp #= -integer =#
         nadj = logπ - log(abs(t * x))
-        if t < 0.0f0; signgamp = Int32(-1); end
+        if t < 0.0f0; signgamp = -1; end
         x = -x
     end
 
