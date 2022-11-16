@@ -85,7 +85,7 @@ function lgammaf_r(x::Float32)
     #= purge off +-inf, NaN, +-0, tiny and negative arguments =#
     signgamp = Int32(1)
     ix = hx & 0x7fffffff
-    ix ≥ 0x7f800000 && return Inf32, signgamp
+    ix ≥ 0x7f800000 && return x * x, signgamp
     ix == 0x00000000 && return Inf32, signgamp
     if ix < 0x35000000 #= |x|<2**-21, return -log(|x|) =#
         if hx < Int32(0)
