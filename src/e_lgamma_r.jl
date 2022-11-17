@@ -156,18 +156,19 @@ function lgamma_r(x::Float64)
 
     #= purge off +-inf, NaN, +-0, tiny and negative arguments =#
     signgamp = 1
+    isneg = hx < Int32(0)
     ix = hx & 0x7fffffff
     ix ≥ 0x7ff00000 && return x * x, signgamp
     ix | lx == 0x00000000 && return Inf, signgamp
     if ix < 0x3b900000 #= |x|<2**-70, return -log(|x|) =#
-        if hx < Int32(0)
+        if isneg
             signgamp = -1
             return -log(-x), signgamp
         else
             return -log(x), signgamp
         end
     end
-    if hx < Int32(0)
+    if isneg
         # ix ≥ 0x43300000 && return Inf, signgamp #= |x|>=2**52, must be -integer =#
         t = sinpi(x)
         iszero(t) && return Inf, signgamp #= -integer =#
@@ -231,7 +232,7 @@ function lgamma_r(x::Float64)
     else #= 2^58 ≤ x ≤ Inf =#
         r = muladd(x, log(x), -x)
     end
-    if hx < Int32(0)
+    if isneg
         r = nadj - r
     end
     return r, signgamp
@@ -247,13 +248,14 @@ function loggamma_r(x::Float64)
 
     #= purge off +-inf, NaN, +-0, tiny and negative arguments =#
     ix = hx & 0x7fffffff
+    isneg = hx < Int32(0)
     ix ≥ 0x7ff00000 && return x * x
     ix | lx == 0x00000000 && return Inf
     if ix < 0x3b900000 #= |x|<2**-70, return -log(|x|) =#
-        hx < Int32(0) && throw(DomainError(x, "`gamma(x)` must be non-negative"))
+        isneg && throw(DomainError(x, "`gamma(x)` must be non-negative"))
         return -log(x)
     end
-    if hx < Int32(0)
+    if isneg
         # ix ≥ 0x43300000 && return Inf #= |x|>=2**52, must be -integer =#
         t = sinpi(x)
         iszero(t) && return Inf #= -integer =#
@@ -317,7 +319,7 @@ function loggamma_r(x::Float64)
     else #= 2^58 ≤ x ≤ Inf =#
         r = muladd(x, log(x), -x)
     end
-    if hx < Int32(0)
+    if isneg
         r = nadj - r
     end
     return r
