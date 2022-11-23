@@ -13,6 +13,16 @@ tofloat(0x3FF3B4C4) # 1.2316322326660156
 tofloat(0x40200000) # 8.0
 tofloat(0x43900000) # 2.8823037615171174e17
 
+tofloat(UInt32((0x3ff-70)<<20))
+
+function ixword(x::Float64)
+    u = reinterpret(UInt64, x)
+    hx = u >>> 32 % Int32
+    ix = hx & 0x7fffffff
+end
+# the first problematic case which is missed by the revised logic
+ixword(nextfloat(2.000001))
+
 function _loggamma3(x::Float64)
     u = reinterpret(UInt64, x)
     hx = u >>> 32 % Int32
@@ -39,7 +49,7 @@ function _loggamma3(x::Float64)
         if t < 0.0; signgamp = Int32(-1); end
         x = -x
     end
-    if ix ≤ 0x40000000     #= for 1.0 ≤ x ≤ 2.0 =#
+    if ix < 0x40000000     #= for 1.0 ≤ x ≤ 2.0 =#
         i = round(x, RoundToZero)
         f = x - i
         if f == 0.0 #= purge off 1 and 2 =#
