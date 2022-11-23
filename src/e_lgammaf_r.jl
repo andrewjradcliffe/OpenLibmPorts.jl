@@ -163,7 +163,8 @@ function lgammaf_r(x::Float32)
         r = muladd(x, log(x), -x)
     end
     if isneg
-        r = nadj - r
+        r = nadj - r # potential source of roundoff error?
+        # r = Float32(Float64(nadj) - Float64(r))
     end
     return r, signgamp
 end
