@@ -33,9 +33,9 @@ using Distributed
 addprocs(95, exeflags=`-O3`)
 @everywhere import SpecialFunctions, OpenLibmPorts
 @everywhere function ulp(x::Float32)
-    # z′ = OpenLibmPorts.logabsgamma(x)[1]
+    z′ = OpenLibmPorts.logabsgamma(x)[1]
     # z = OpenLibmPorts.logabsgamma(Float64(x))[1]
-    z′ = SpecialFunctions.logabsgamma(x)[1]
+    # z′ = SpecialFunctions.logabsgamma(x)[1]
     z = SpecialFunctions.logabsgamma(Float64(x))[1]
     isinf(z′) && isinf(oftype(x, z)) && return 0.0
     iszero(z′) && iszero(z) && return 0.0
@@ -56,11 +56,11 @@ end
 us = 0x00000000:0x00000001:0x7f800000
 u_ranges = splitrange(us, length(us) ÷ (nprocs() - 1));
 
-ulps = reduce(vcat, pmap(Broadcast.BroadcastFunction(ulp ∘ f32), u_ranges));
+# ulps = reduce(vcat, pmap(Broadcast.BroadcastFunction(ulp ∘ f32), u_ranges));
 neg_ulps = reduce(vcat, pmap(Broadcast.BroadcastFunction(ulp ∘ negf32), u_ranges));
 
-mx, i = findmax(ulps);
-neg_mx, neg_i = findmax(neg_ulps);
+# mx, i = findmax(ulps);
+# neg_mx, neg_i = findmax(neg_ulps);
 
 xs = negf32.(us[findall(≥(3.5), neg_ulps)]);
 vals_f32 = first.(SpecialFunctions.logabsgamma.(xs));
@@ -74,10 +74,14 @@ pl2 = plot(xs, vals_f64, labels="Float64", linewidth=3, xlabel="x",
            ylabel="logabsgamma(x)[1]");
 plot!(pl2, xs, vals_f32, labels="Float32", xlabel="x");
 pl3 = plot(xs, abs.(vals_f32 .- vals_f64), labels="|z′ - z|", xlabel="x", yscale=:log10);
-pl4 = plot(pl1, pl2, pl3, size=(1200,800), layout=grid(2,2));
+pl4 = plot(pl1, pl2, pl3, size=(1200,800), layout=grid(2,2), plot_title="This PR",
+           left_margin=50*Plots.px);
 
-savefig(pl4, joinpath(pwd(), "fval_notapproxeq_openlibm.pdf"))
-savefig(pl4, joinpath(pwd(), "fval_notapproxeq_openlibm.png"))
+savefig(pl4, joinpath(pwd(), "fval_notapproxeq_thispr0.pdf"))
+savefig(pl4, joinpath(pwd(), "fval_notapproxeq_thispr0.png"))
+
+rmprocs(workers()...)
+exit()
 
 # Misc
 isequallybad(x) = SpecialFunctions.logabsgamma(x)[1] ≈ OpenLibmPorts.logabsgamma(x)[1]
