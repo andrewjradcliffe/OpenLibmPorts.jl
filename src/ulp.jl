@@ -33,9 +33,9 @@ using Distributed
 addprocs(95, exeflags=`-O3`)
 @everywhere import SpecialFunctions, OpenLibmPorts
 @everywhere function ulp(x::Float32)
-    z′ = OpenLibmPorts.logabsgamma(x)[1]
+    # z′ = OpenLibmPorts.logabsgamma(x)[1]
     # z = OpenLibmPorts.logabsgamma(Float64(x))[1]
-    # z′ = SpecialFunctions.logabsgamma(x)[1]
+    z′ = SpecialFunctions.logabsgamma(x)[1]
     z = SpecialFunctions.logabsgamma(Float64(x))[1]
     isinf(z′) && isinf(oftype(x, z)) && return 0.0
     iszero(z′) && iszero(z) && return 0.0
@@ -75,35 +75,35 @@ pl2 = plot(xs, vals_f64, labels="Float64", linewidth=3, xlabel="x",
 plot!(pl2, xs, vals_f32, labels="Float32", xlabel="x");
 pl3 = plot(xs, abs.(vals_f32 .- vals_f64), labels="|z′ - z|", xlabel="x", yscale=:log10);
 pl4 = plot(pl1, pl2, pl3, size=(1200,800), layout=grid(2,2), plot_title="This PR",
-           left_margin=50*Plots.px);
+           left_margin=20*Plots.px);
 
-savefig(pl4, joinpath(pwd(), "fval_notapproxeq_thispr0.pdf"))
-savefig(pl4, joinpath(pwd(), "fval_notapproxeq_thispr0.png"))
+savefig(pl4, joinpath(pwd(), "anomaly_Float32_openlibm.pdf"))
+savefig(pl4, joinpath(pwd(), "anomaly_Float32_openlibm.png"))
 
 rmprocs(workers()...)
 exit()
 
-# Misc
-isequallybad(x) = SpecialFunctions.logabsgamma(x)[1] ≈ OpenLibmPorts.logabsgamma(x)[1]
-delta(::Type{T}, x) where {T} = abs(OpenLibmPorts.logabsgamma(x)[1] - SpecialFunctions.logabsgamma(T(x))[1])
-delta(x::T) where {T} = delta(T, x)
+# # Misc
+# isequallybad(x) = SpecialFunctions.logabsgamma(x)[1] ≈ OpenLibmPorts.logabsgamma(x)[1]
+# delta(::Type{T}, x) where {T} = abs(OpenLibmPorts.logabsgamma(x)[1] - SpecialFunctions.logabsgamma(T(x))[1])
+# delta(x::T) where {T} = delta(T, x)
 
-frac = count(isequallybad, xs) / length(xs)
-xs′ = filter(!isequallybad, xs);
-v1 = SpecialFunctions.logabsgamma.(xs′);
-v2 = SpecialFunctions.logabsgamma.(big.(xs′));
-mx3, i3 = findmax(ulp, xs′)
+# frac = count(isequallybad, xs) / length(xs)
+# xs′ = filter(!isequallybad, xs);
+# v1 = SpecialFunctions.logabsgamma.(xs′);
+# v2 = SpecialFunctions.logabsgamma.(big.(xs′));
+# mx3, i3 = findmax(ulp, xs′)
 
-g_1 = count(≥(1.0), ulps)
-g_15 = count(≥(1.5), ulps)
-g_175 = count(≥(1.75), ulps)
-g_2 = count(≥(2.0), ulps)
-g_225 = count(≥(2.25), ulps)
+# g_1 = count(≥(1.0), ulps)
+# g_15 = count(≥(1.5), ulps)
+# g_175 = count(≥(1.75), ulps)
+# g_2 = count(≥(2.0), ulps)
+# g_225 = count(≥(2.25), ulps)
 
 
-using Plots
-# pl = histogram(ulps, label="computed against Float64");
+# using Plots
+# # pl = histogram(ulps, label="computed against Float64");
 
-pl = bar([g_15, g_175, g_2, g_225] ./ length(ulps));
+# pl = bar([g_15, g_175, g_2, g_225] ./ length(ulps));
 
-savefig(pl, joinpath(pwd(), "ulp_Float32.pdf"))
+# savefig(pl, joinpath(pwd(), "ulp_Float32.pdf"))
