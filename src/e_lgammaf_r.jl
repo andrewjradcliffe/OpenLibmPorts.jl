@@ -100,7 +100,7 @@ function lgammaf_r(x::Float32)
         # ix ≥ 0x4b000000 && return Inf32, signgamp #= |x|>=2**23, must be -integer =#
         t = sinpi(x)
         t == 0.0f0 && return Inf32, signgamp #= -integer =#
-        nadj = logπ - log(abs(t * x))
+        nadj = logπ - log(abs(t * x)) #log(π / abs(t * x))
         if t < 0.0f0; signgamp = -1; end
         x = -x
     end
