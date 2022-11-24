@@ -263,7 +263,7 @@ function loggamma_r(x::Float64)
         t < 0.0 && throw(DomainError(x, "`gamma(x)` must be non-negative"))
         x = -x
     end
-    if ix ≤ 0x40000000     #= for x < 2.0 =#
+    if ix < 0x40000000     #= for x < 2.0 =#
         i = round(x, RoundToZero)
         f = x - i
         if f == 0.0

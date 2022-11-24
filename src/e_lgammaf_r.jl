@@ -192,7 +192,7 @@ function loggammaf_r(x::Float32)
         x = -x
     end
 
-    if ix ≤ 0x40000000 #= for 1.0 ≤ x ≤ 2.0 =#
+    if ix < 0x40000000 #= for 1.0 ≤ x ≤ 2.0 =#
         i = round(x, RoundToZero)
         f = x - i
         if f == 0.0f0 #= purge off 1 and 2 =#
