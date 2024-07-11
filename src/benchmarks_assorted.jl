@@ -190,3 +190,127 @@ x = rand()
 opt11(r, x, c)
 @benchmark opt11($(Ref(r))[], $(Ref(x))[], $(Ref(c))[])
 @benchmark opt12($(Ref(r))[], $(Ref(x))[], $(Ref(c))[])
+
+################
+# purging preamble
+using BenchmarkTools, Test
+
+
+function option1(x)
+    ux = reinterpret(UInt64, x)
+    hx = ux >>> 32 % Int32
+    lx = ux % UInt32
+
+    #= purge off +-inf, NaN, +-0, tiny and negative arguments =#
+    signgam = 1
+    ix = hx & 0x7fffffff
+    ix ≥ 0x7ff00000 && return x * x, signgam
+    ix | lx == 0x00000000 && return Inf, signgam
+    if ix < 0x3b900000 #= |x|<2**-70, return -log(|x|) =#
+        if hx < Int32(0)
+            signgam = -1
+            return -log(-x), signgam
+        else
+            return -log(x), signgam
+        end
+    end
+    x, signgam
+end
+
+function option2(x)
+    ux = reinterpret(UInt64, x)
+    hx = ux >>> 32 % Int32
+
+    #= purge off +-inf, NaN, +-0, tiny and negative arguments =#
+    signgam = 1
+    ix = hx & 0x7fffffff
+    ix = hx & 0x7fffffff
+    ix ≥ 0x7ff00000 && return x * x, signgam
+    # # x == 0.0 && return Inf, signgam
+    # if ix < 0x3b900000 #= |x|<2**-70, return -log(|x|) =#
+    #     if hx < Int32(0)
+    #         signgam = -1
+    #         return -log(-x), signgam
+    #     else
+    #         return -log(x), signgam
+    #     end
+    # end
+    if ix < 0x3b900000 #= |x|<2**-70, return -log(|x|) =#
+        if hx < Int32(0)
+            signgam = -1
+            return -log(-x), signgam
+        else
+            return -log(x), signgam
+        end
+    end
+    x, signgam
+end
+
+function option3(x)
+    ux = reinterpret(UInt64, x)
+    lx = ux % UInt32
+
+    #= purge off +-inf, NaN, +-0, tiny and negative arguments =#
+    signgam = 1
+    negsign = ux >>> 63 != 0
+    ix = (ux >>> 32 % UInt32) & 0x7fffffff
+    ix ≥ 0x7ff00000 && return x * x, signgam
+    ix | lx == 0x00000000 && return Inf, signgam
+    if ix < 0x3b900000 #= |x|<2**-70, return -log(|x|) =#
+        if negsign
+            signgam = -1
+            return -log(-x), signgam
+        else
+            return -log(x), signgam
+        end
+    end
+    x, signgam
+end
+
+function bench(z)
+    b1 = @benchmark option1($z)
+    b2 = @benchmark option2($z)
+    # b2 = @benchmark option3($z)
+    b1, b2
+end
+
+
+x1 = 1.5;
+x2 = prevfloat(2.0^-70);
+x2′ = -x2;
+x3 = Inf;
+x4 = NaN;
+x5 = -Inf;
+x6 = 0.0;
+xs = [x1, x2, x2′, x3, x5, x4, x6];
+@test all(option1.(xs) .=== option2.(xs) .=== option3.(xs))
+
+bench.(xs)
+
+function opt1(x)
+    t = sinpi(x)
+    iszero(t) && return Inf
+    log(π / abs(t * x))
+end
+
+function opt2(x)
+    t = sinpi(x)
+    iszero(t) && return Inf
+    log(π) - log(abs(t * x))
+end
+
+opt1(nextfloat(-Inf))
+opt2(nextfloat(-Inf))
+for x = -100000.0:2e-1:-eps()
+    @test opt1(x) ≈ opt2(x) atol=1e-14
+end
+opt1(-prevfloat(2.0^52))
+
+for x = -eps():eps()/30:-eps()/10
+    @test opt1(x) ≈ opt2(x) atol=1e-13
+end
+
+yy = -2.0^30
+opt1(nextfloat(yy))
+opt2(nextfloat(yy))
+sinpi(yy)

@@ -74,7 +74,7 @@ pl2 = plot(xs, vals_f64, labels="Float64", linewidth=3, xlabel="x",
            ylabel="logabsgamma(x)[1]");
 plot!(pl2, xs, vals_f32, labels="Float32", xlabel="x");
 pl3 = plot(xs, abs.(vals_f32 .- vals_f64), labels="|z′ - z|", xlabel="x", yscale=:log10);
-pl4 = plot(pl1, pl2, pl3, size=(1200,800), layout=grid(2,2), plot_title="This PR",
+pl4 = plot(pl1, pl2, pl3, size=(1200,800), layout=grid(2,2), plot_title="OpenLibm",
            left_margin=20*Plots.px);
 
 savefig(pl4, joinpath(pwd(), "anomaly_Float32_openlibm.pdf"))

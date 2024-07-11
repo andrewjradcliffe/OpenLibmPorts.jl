@@ -31,8 +31,9 @@ benchplots_mean(::Type{T}) where {T} = benchplots(T, meantimes)
 benchplots_min(::Type{T}) where {T} = benchplots(T, mintimes)
 
 p = benchplots_min(Float64);
-savefig(p, joinpath(pwd(), "benchplot_64.pdf"))
-savefig(p, joinpath(pwd(), "benchplot_64.png"))
+
+savefig(p0, joinpath(pwd(), "benchplot_64.pdf"))
+savefig(p0, joinpath(pwd(), "benchplot_64.png"))
 savefig(p, joinpath(pwd(), "benchplot_64.svg"))
 
 p2 = benchplots_min(Float32);
